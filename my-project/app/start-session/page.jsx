@@ -4,19 +4,39 @@ import { useEffect, useState } from "react";
 const StartSession = () => {
   const [query, setQuery] = useState('')
   const [messages, setMessages] = useState([{
-    sender: 'therapist',
-    message: 'Hi! Is everything treating you well today?'
+    role: 'system',
+    content: 'Hi! Is everything treating you well today?'
   }])
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
-    setMessages([ ...messages, { sender: 'user', message: query }]);
+    // setMessages([ ...messages, { role: 'user', content: query }]);
+    setMessages(prev => [...prev, { role: 'user', content: query}]);
+    const therapistResponse = await fetch('/api/search',{
+      method:'POST',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: query })
+    })
+    const therapistData = await therapistResponse.json();
+    console.log('therapistResponse ',therapistData);
+    const chatData = await fetch('/api/chat', {
+      method: 'POST',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({data:therapistData, query: query, messages: messages})
+    });
+    const chatDataMessage = await chatData.json();
+    console.log("chatdata = ", chatDataMessage);
+    setMessages(prev => [...prev, { role: 'system', content: chatDataMessage.message}]);
     setQuery('');
   }
   return (
     <div className=' w-full h-[545px] flex flex-col justify-between rounded-lg'>
       <div className='w-full h-full flex flex-col gap-4 overflow-y-auto pr-4'>
-        {messages.map((message, index) => <Message key={index} sender={message.sender} message={message.message}/>)}
+        {messages.map((message, index) => <Message key={index} sender={message.role} message={message.content}/>)}
       </div>
       <div className='w-full mt-4'>
       <form onSubmit={handleSubmit} className='bg-[#030712] p-0.5 rounded-lg flex justify-center'>
