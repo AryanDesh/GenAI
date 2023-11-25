@@ -1,8 +1,11 @@
 'use client';
 import Message from  "@components/Message";
 import Spinner from "@components/Spinner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+
 const StartSession = () => {
+
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState([{
@@ -51,6 +54,7 @@ const StartSession = () => {
           onChange={(e) => setQuery(e.target.value)}
         />
         <div className='flex items-center mx-4 gap-8 relative'>
+          
           {loading ? <Spinner/>:
           <button type='submit' disabled={loading} className="text-white">Submit</button>
           }
